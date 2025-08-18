@@ -21,11 +21,11 @@ BSIV_ls_mod_labels <- list(
   # all correct
   mod_labels0 = c(1,1,1,1,1,1,1,1),
   # set 1 correct
-  mod_labels1 = c(1,0,0,1,1,1,1,0),
+  mod_labels1 = c(0,0,0,0,1,1,1,1),
   # set 2 correct
-  mod_labels2 = c(0,0,0,0,1,1,1,1),
+  mod_labels2 = c(1,1,1,1,1,0,0,0),
   # set 3 correct
-  mod_labels3 = c(1,1,1,1,1,0,0,0),
+  mod_labels3 = c(1,0,0,1,1,1,1,0),
   # set 4 correct
   mod_labels4 = c(0,1,1,0,1,0,0,1),
   # all incorrect
