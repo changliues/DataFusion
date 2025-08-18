@@ -320,7 +320,8 @@ run_para_BSIV <- function(dataset,used_model,crossfit_folds=4,BSIV_cf_inds){
   ### get standard derivation of each fold
   var.vec <- rep(NA,k)
   for(fold in 1:crossfit_folds){
-    var.vec[fold] <- var(if.ett[fold_idx], na.rm = T)
+    fold_idx <- cf_inds[[fold]]$eval
+    var.vec[fold] <- var(if.ett[fold_idx]-if.est.ETTb, na.rm = T)
   }
   if.sd.ETTb <- sqrt(mean(var.vec, na.rm = T))/sqrt(n-length(idx.rm))
   lower <- if.est.ETTb  - critical_t * if.sd.ETTb
