@@ -264,7 +264,7 @@ ProximalInference <- setRefClass(
       estimates2 <- c()
       estimates3 <- c()
       estimates4 <- c()
-      estimates4.sd <- c()
+      estimates4.if <- list()
       for (fold in 1:.self$crossfit_folds) {
         ### regression
         fold_train_idx <- .self$cf_inds[[fold]]$train
@@ -329,14 +329,21 @@ ProximalInference <- setRefClass(
         ests4 <- (1/(pgo*pa.o)) * (Igo * (y-Ia0*.self$q[[fold]]$q_mod(rq)*(y-.self$h[[fold]]$h_mod(rh))-eta0.hat)-
                                      Ige*Ia0/(1-pa.ex.hat)*(.self$h[[fold]]$h_mod(rh)-eta0.hat)*(1/pge.x.hat-1))
         est4 <- mean(ests4)
-        est4.sd <- sd(ests4)
+        estimates4.if[[fold]] <- ests4
         
         estimates1 <- c(estimates1, est1)
         estimates2 <- c(estimates2, est2)
         estimates3 <- c(estimates3, est3)
         estimates4 <- c(estimates4, est4)
-        estimates4.sd <- c(estimates4.sd, est4.sd)
       }
+      
+      estimates4=mean(estimates4)
+      estimates4.sd <- c()
+      
+      for(fold in 1:(.self$crossfit_folds)) {
+        estimates4.sd <- c(estimates4.sd, sd(estimates4.if[[fold]]-estimates4))
+      }
+
       if (is.null(reduction)) {
         return(list(estimates1 = estimates1,
                     estimates2 = estimates2,
@@ -359,7 +366,7 @@ ProximalInference <- setRefClass(
       estimates2 <- c()
       estimates3 <- c()
       estimates4 <- c()
-      estimates4.sd <- c()
+      estimates4.if <- list()
       for (fold in 1:.self$crossfit_folds) {
         ### regression
         fold_train_idx <- .self$cf_inds[[fold]]$train
@@ -433,14 +440,21 @@ ProximalInference <- setRefClass(
         ests4 <- (1/(pgo*pa.o)) * (Igo * (y-Ia0*.self$q_nt[[fold]]$q_mod(rq)*(y-.self$h[[fold]]$h_mod(rh))-eta0.hat)-
                                      Ige*Ia0/(1-pa.ex.hat)*(.self$h[[fold]]$h_mod(rh)-eta0.hat)*(1/pge.x.hat-1))
         est4 <- mean(ests4)
-        est4.sd <- sd(ests4)
+        estimates4.if[[fold]] <- ests4
         
         estimates1 <- c(estimates1, est1)
         estimates2 <- c(estimates2, est2)
         estimates3 <- c(estimates3, est3)
         estimates4 <- c(estimates4, est4)
-        estimates4.sd <- c(estimates4.sd, est4.sd)
       }
+      
+      estimates4=mean(estimates4)
+      estimates4.sd <- c()
+      
+      for(fold in 1:(.self$crossfit_folds)) {
+        estimates4.sd <- c(estimates4.sd, sd(estimates4.if[[fold]]-estimates4))
+      }
+      
       if (is.null(reduction)) {
         return(list(estimates1 = estimates1,
                     estimates2 = estimates2,
@@ -463,7 +477,7 @@ ProximalInference <- setRefClass(
       estimates2 <- c()
       estimates3 <- c()
       estimates4 <- c()
-      estimates4.sd <- c()
+      estimates4.if <- list()
       for (fold in 1:.self$crossfit_folds) {
         ### regression
         fold_train_idx <- .self$cf_inds[[fold]]$train
@@ -537,14 +551,21 @@ ProximalInference <- setRefClass(
         ests4 <- (1/(pgo*pa.o)) * (Igo * (y-Ia0*.self$q_nt[[fold]]$q_mod(rq)*(y-.self$h[[fold]]$h_mod(rh))-eta0.hat)-
                                      Ige*Ia0/(1-pa.ex.hat)*(.self$h[[fold]]$h_mod(rh)-eta0.hat)*(1/pge.x.hat-1))
         est4 <- mean(ests4)
-        est4.sd <- sd(ests4)
+        estimates4.if[[fold]] <- ests4
         
         estimates1 <- c(estimates1, est1)
         estimates2 <- c(estimates2, est2)
         estimates3 <- c(estimates3, est3)
         estimates4 <- c(estimates4, est4)
-        estimates4.sd <- c(estimates4.sd, est4.sd)
       }
+      
+      estimates4=mean(estimates4)
+      estimates4.sd <- c()
+      
+      for(fold in 1:(.self$crossfit_folds)) {
+        estimates4.sd <- c(estimates4.sd, sd(estimates4.if[[fold]]-estimates4))
+      }
+      
       if (is.null(reduction)) {
         return(list(estimates1 = estimates1,
                     estimates2 = estimates2,
@@ -567,7 +588,7 @@ ProximalInference <- setRefClass(
       estimates2 <- c()
       estimates3 <- c()
       estimates4 <- c()
-      estimates4.sd <- c()
+      estimates4.if <- list()
       for (fold in 1:.self$crossfit_folds) {
         ### regression
         fold_train_idx <- .self$cf_inds[[fold]]$train
@@ -641,14 +662,21 @@ ProximalInference <- setRefClass(
         ests4 <- (1/(pgo*pa.o)) * (Igo * (y-Ia0*.self$q[[fold]]$q_mod(rq)*(y-.self$h_nt[[fold]]$h_mod(rh))-eta0.hat)-
                                      Ige*Ia0/(1-pa.ex.hat)*(.self$h_nt[[fold]]$h_mod(rh)-eta0.hat)*(1/pge.x.hat-1))
         est4 <- mean(ests4)
-        est4.sd <- sd(ests4)
+        estimates4.if[[fold]] <- ests4
         
         estimates1 <- c(estimates1, est1)
         estimates2 <- c(estimates2, est2)
         estimates3 <- c(estimates3, est3)
         estimates4 <- c(estimates4, est4)
-        estimates4.sd <- c(estimates4.sd, est4.sd)
       }
+      
+      estimates4=mean(estimates4)
+      estimates4.sd <- c()
+      
+      for(fold in 1:(.self$crossfit_folds)) {
+        estimates4.sd <- c(estimates4.sd, sd(estimates4.if[[fold]]-estimates4))
+      }
+      
       if (is.null(reduction)) {
         return(list(estimates1 = estimates1,
                     estimates2 = estimates2,
@@ -671,7 +699,7 @@ ProximalInference <- setRefClass(
       estimates2 <- c()
       estimates3 <- c()
       estimates4 <- c()
-      estimates4.sd <- c()
+      estimates4.if <- list()
       for (fold in 1:.self$crossfit_folds) {
         ### regression
         fold_train_idx <- .self$cf_inds[[fold]]$train
@@ -745,14 +773,21 @@ ProximalInference <- setRefClass(
         ests4 <- (1/(pgo*pa.o)) * (Igo * (y-Ia0*.self$q_nt[[fold]]$q_mod(rq)*(y-.self$h_nt[[fold]]$h_mod(rh))-eta0.hat)-
                                      Ige*Ia0/(1-pa.ex.hat)*(.self$h_nt[[fold]]$h_mod(rh)-eta0.hat)*(1/pge.x.hat-1))
         est4 <- mean(ests4)
-        est4.sd <- sd(ests4)
+        estimates4.if[[fold]] <- ests4
         
         estimates1 <- c(estimates1, est1)
         estimates2 <- c(estimates2, est2)
         estimates3 <- c(estimates3, est3)
         estimates4 <- c(estimates4, est4)
-        estimates4.sd <- c(estimates4.sd, est4.sd)
       }
+      
+      estimates4=mean(estimates4)
+      estimates4.sd <- c()
+      
+      for(fold in 1:(.self$crossfit_folds)) {
+        estimates4.sd <- c(estimates4.sd, sd(estimates4.if[[fold]]-estimates4))
+      }
+      
       if (is.null(reduction)) {
         return(list(estimates1 = estimates1,
                     estimates2 = estimates2,
