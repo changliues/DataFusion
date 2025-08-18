@@ -13,7 +13,7 @@ Z.e <- ifelse(STAR_complete$g3surban=="RURAL",3,ifelse(STAR_complete$g3surban=="
 
 M_math.e <- STAR_complete$g3tmathss
 
-M_math.fac.e <- ifelse(M_math.e <= 580,1,ifelse(M_math.e <= 590,2,ifelse(M_math.e <= 600,3,ifelse(M_math.e <= 610, 4,ifelse(M_math.e <= 620 , 5,6)))))
+M_math.fac.e <- ifelse(M_math.e <= 585,1,ifelse(M_math.e <= 600,2,ifelse(M_math.e <= 615,3,4)))
 
 Y_math.e <- STAR_complete$g8tmathss #NULL
 
@@ -26,7 +26,7 @@ Z.o <- ECLSK8_complete$R5URBAN
 
 M_math.o <- ECLSK8_complete$C5R4MTHT_R
 
-M_math.fac.o <- ifelse(M_math.o <= 580,1,ifelse(M_math.o <= 590,2,ifelse(M_math.o <= 600,3,ifelse(M_math.o <= 610, 4,ifelse(M_math.o <= 620 , 5, 6)))))
+M_math.fac.o <- ifelse(M_math.o <= 585,1,ifelse(M_math.o <= 600,2,ifelse(M_math.o <= 615,3,4)))
 
 Y_math.o <- ECLSK8_complete$C7R4MTHT_R
 
