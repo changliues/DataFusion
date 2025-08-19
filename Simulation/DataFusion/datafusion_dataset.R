@@ -75,7 +75,7 @@ ProxCIData <- setRefClass(
     },
     
     create_crossfit_split = function(n_splits, cache = TRUE) {
-      """split the dataset into n_split groups for cross-fitting"""
+      # split the dataset into n_split groups for cross-fitting
       if (n_splits <= 1) {
         idx <- seq_len(.self$n)
         split_indices <<- list(list(train = idx, eval = idx))
