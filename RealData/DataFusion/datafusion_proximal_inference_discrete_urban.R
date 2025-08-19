@@ -17,20 +17,27 @@ ProximalInference <- setRefClass(
     cf_inds = "list",
     h = "list",
     q = "list",
-    mod_spec = "list"
+    mod_spec = "list",
+    lbd = "numeric",
+    Z_cat = "numeric",
+    Z_cat_n = "integer",
+    M_cat = "numeric",
+    M_cat_n = "integer"
   ),
   methods = list(
     
     initialize = function(
     proxci_dataset,
     crossfit_folds = 1,
-    mod_spec = proximal_model_spec
+    mod_spec = proximal_model_spec,
+    lbd = 0
     ) {
       stopifnot(crossfit_folds >= 1)
       .self$data <- proxci_dataset
       .self$crossfit_folds <- crossfit_folds
       .self$cf_inds <- .self$data$create_crossfit_split(crossfit_folds)
       .self$mod_spec <- mod_spec
+      .self$lbd <- lbd
       
       .self$h <- lapply(1:crossfit_folds, function(i) {
         .self$estimate_h(fold = i)
@@ -39,6 +46,12 @@ ProximalInference <- setRefClass(
       .self$q <- lapply(1:crossfit_folds, function(i) {
         .self$estimate_q(fold = i)
       })
+      
+      .self$Z_cat <- sort(unique(proxci_dataset$Z))
+      .self$Z_cat_n <- length(unique(proxci_dataset$Z))
+      
+      .self$M_cat <- sort(unique(proxci_dataset$M.fac))
+      .self$M_cat_n <- length(unique(proxci_dataset$M.fac))
       
     },
     
@@ -52,7 +65,7 @@ ProximalInference <- setRefClass(
       
       y.aZo <- function(a,x1,x2,x3){
         predict(y.azo.fit, newdata=data.frame(a=a,
-                                              z=c(1,2,3),
+                                              z=.self$Z_cat,
                                               x1=x1,
                                               x2=x2,
                                               x3=x3))
@@ -68,12 +81,7 @@ ProximalInference <- setRefClass(
       
       pM.aZo <- function(a,x1,x2,x3){
         
-        t(predict(pm.azo.fit, newdata = data.frame(a=a,z=c(1,2,3),x1=x1,x2=x2,x3=x3), type = "probs"))
-        
-        # m1 <- c(pm.azo.fit(1,a,1,x1,x2,x3),pm.azo.fit(1,a,2,x1,x2,x3),pm.azo.fit(1,a,3,x1,x2,x3))
-        # m2 <- c(pm.azo.fit(2,a,1,x1,x2,x3),pm.azo.fit(2,a,2,x1,x2,x3),pm.azo.fit(2,a,3,x1,x2,x3))
-        # m3 <- c(pm.azo.fit(3,a,1,x1,x2,x3),pm.azo.fit(3,a,2,x1,x2,x3),pm.azo.fit(3,a,3,x1,x2,x3))
-        # rbind(m1,m2,m3)
+        t(predict(pm.azo.fit, newdata = data.frame(a=a,z=.self$Z_cat,x1=x1,x2=x2,x3=x3), type = "probs"))
       }
       
       h_mod <- function(m,a,x1,x2,x3){
@@ -94,7 +102,11 @@ ProximalInference <- setRefClass(
         
         result <- c()
         for(i in 1:n){
-          result <- c(result,c(y.aZo(a.vec[i],x1[i],x2[i],x3[i]) %*% pinv(pM.aZo(a.vec[i],x1[i],x2[i],x3[i]),tol = 1e-30))[m.vec[i]])
+          mat <- pM.aZo(a.vec[i],x1[i],x2[i],x3[i])
+          #+matrix(rnorm(12,0.01,0.1),nrow=4)
+          inv.mat <- solve(t(mat) %*% mat + .self$lbd*diag(3)) %*% t(mat)
+          # inv.mat <- pinv(mat)
+          result <- c(result,c(y.aZo(a.vec[i],x1[i],x2[i],x3[i]) %*% inv.mat)[m.vec[i]])
         }
         
         return(result)
@@ -153,12 +165,7 @@ ProximalInference <- setRefClass(
       
       
       pZ.aMo <- function(a,x1,x2,x3){
-        t(predict(pz.amo.fit, newdata = data.frame(a=a,m=c(1,2,3,4,5,6),x1=x1,x2=x2,x3=x3), type = "probs"))
-        
-        # z1 <- c(pz.amo.fit(1,a,1,x1,x2,x3),pz.amo.fit(1,a,2,x1,x2,x3),pz.amo.fit(1,a,3,x1,x2,x3))
-        # z2 <- c(pz.amo.fit(2,a,1,x1,x2,x3),pz.amo.fit(2,a,2,x1,x2,x3),pz.amo.fit(2,a,3,x1,x2,x3))
-        # z3 <- c(pz.amo.fit(3,a,1,x1,x2,x3),pz.amo.fit(3,a,2,x1,x2,x3),pz.amo.fit(3,a,3,x1,x2,x3))
-        # rbind(z1,z2,z3)
+        t(predict(pz.amo.fit, newdata = data.frame(a=a,m=.self$M_cat,x1=x1,x2=x2,x3=x3), type = "probs"))
       }
       
       q_mod <- function(z,a,x1,x2,x3){
@@ -187,7 +194,7 @@ ProximalInference <- setRefClass(
       estimates2 <- c()
       estimates3 <- c()
       estimates4 <- c()
-      estimates4.sd <- c()
+      estimates4.if <- list()
       for (fold in 1:.self$crossfit_folds) {
         ### regression
         fold_train_idx <- .self$cf_inds[[fold]]$train
@@ -239,14 +246,12 @@ ProximalInference <- setRefClass(
                                                                    x2e = .self$data$X[fold_idx,2],
                                                                    x3e = .self$data$X[fold_idx,3])))
         pM.0e.hat <- predict(pm.ae.fit, newdata = data.frame(a=0,x1=.self$data$X[fold_idx,1],x2=.self$data$X[fold_idx,2],x3=.self$data$X[fold_idx,3]), type = "probs")
-        h10.hat <- .self$h[[fold]]$h_mod(1,0,.self$data$X[fold_idx,1],.self$data$X[fold_idx,2],.self$data$X[fold_idx,3])
-        h20.hat <- .self$h[[fold]]$h_mod(2,0,.self$data$X[fold_idx,1],.self$data$X[fold_idx,2],.self$data$X[fold_idx,3])
-        h30.hat <- .self$h[[fold]]$h_mod(3,0,.self$data$X[fold_idx,1],.self$data$X[fold_idx,2],.self$data$X[fold_idx,3])
-        h40.hat <- .self$h[[fold]]$h_mod(4,0,.self$data$X[fold_idx,1],.self$data$X[fold_idx,2],.self$data$X[fold_idx,3])
-        h50.hat <- .self$h[[fold]]$h_mod(5,0,.self$data$X[fold_idx,1],.self$data$X[fold_idx,2],.self$data$X[fold_idx,3])
-        h60.hat <- .self$h[[fold]]$h_mod(6,0,.self$data$X[fold_idx,1],.self$data$X[fold_idx,2],.self$data$X[fold_idx,3])
-        # h70.hat <- .self$h[[fold]]$h_mod(7,0,.self$data$X[fold_idx,1],.self$data$X[fold_idx,2],.self$data$X[fold_idx,3])
-        eta0.hat <- c(rowSums(pM.0e.hat * cbind(h10.hat,h20.hat,h30.hat,h40.hat,h50.hat,h60.hat)))
+        
+        hm0.hat <- matrix(NA, nrow = length(fold_idx), ncol = .self$M_cat_n)
+        for(l in 1:.self$M_cat_n){
+          hm0.hat[,l] <- .self$h[[fold]]$h_mod(.self$M_cat[l],0,.self$data$X[fold_idx,1],.self$data$X[fold_idx,2],.self$data$X[fold_idx,3])
+        }
+        eta0.hat <- c(rowSums(pM.0e.hat * hm0.hat))
         
         h0.hat <- .self$h[[fold]]$h_mod(.self$data$M.fac[fold_idx],0,.self$data$X[fold_idx,1],.self$data$X[fold_idx,2],.self$data$X[fold_idx,3])
         q0.hat <- .self$q[[fold]]$q_mod(.self$data$Z[fold_idx],0,.self$data$X[fold_idx,1],.self$data$X[fold_idx,2],.self$data$X[fold_idx,3])
@@ -259,14 +264,21 @@ ProximalInference <- setRefClass(
         
         ests4 <- (1/(pgo*pa.o)) * (Igo * (y-Ia0*q0.hat*(y-h0.hat)-eta0.hat)-Ige*Ia0/(1-pa.ex.hat)*(h0.hat-eta0.hat)*(1/pge.x.hat-1))
         est4 <- mean(ests4)
-        est4.sd <- sd(ests4)
+        estimates4.if[[fold]] <- ests4
         
         estimates1 <- c(estimates1, est1)
         estimates2 <- c(estimates2, est2)
         estimates3 <- c(estimates3, est3)
         estimates4 <- c(estimates4, est4)
-        estimates4.sd <- c(estimates4.sd, est4.sd)
       }
+      
+      estimates4=mean(estimates4)
+      estimates4.sd <- c()
+      
+      for(fold in 1:(.self$crossfit_folds)) {
+        estimates4.sd <- c(estimates4.sd, sd(estimates4.if[[fold]]-estimates4))
+      }
+      
       if (is.null(reduction)) {
         return(list(estimates1 = estimates1,
                     estimates2 = estimates2,
