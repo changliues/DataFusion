@@ -38,7 +38,8 @@ source("DataFusion/datafusion_proximal_inference_discrete_urban.R")
 proxci_estimator <- ProximalInference$new(
   dataset,
   crossfit_folds =n.flds,
-  mod_spec = proximal_model_spec_urban)
+  mod_spec = proximal_model_spec_urban,
+  lbd = 10e-10)
   
 est <- proxci_estimator$est()
 
