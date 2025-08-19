@@ -16,18 +16,16 @@ join_data <- function(...) {
 ProxCIData <- setRefClass(
   "ProxCIData",
 
-  """
-  Parameters:
-     X: Covariate matrix that is common cause of treatment and outcome variables
-     Z: Proximal variable vector
-     M: Short-term outcome vector
-     Y: Long-term outcome vector
-     A: Treatment variable vector
-     G: Population indicator variable vector
-     Xs: Coarsened covariate matrix
-     n: sample size
-     split_indices: list of splitted sample data indices; list length depends on how many folds the data are splitted into
-  """
+  # Parameters:
+  #    X: Covariate matrix that is common cause of treatment and outcome variables
+  #    Z: Proximal variable vector
+  #    M: Short-term outcome vector
+  #    Y: Long-term outcome vector
+  #    A: Treatment variable vector
+  #    G: Population indicator variable vector
+  #    Xs: Coarsened covariate matrix
+  #    n: sample size
+  #    split_indices: list of splitted sample data indices; list length depends on how many folds the data are splitted into
   
   fields = list(
     X = "matrix",
